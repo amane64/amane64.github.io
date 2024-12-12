@@ -20,9 +20,9 @@
       
         <tags>
             
-            <tag> Java </tag>
-            
             <tag> Python </tag>
+            
+            <tag> Java </tag>
             
             <tag> 跨语言运行 </tag>
             
@@ -198,6 +198,37 @@
             <tag> 国际化 </tag>
             
             <tag> 语言 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>有序表的查找</title>
+      <link href="/2023/09/19/%E6%9C%89%E5%BA%8F%E8%A1%A8%E7%9A%84%E6%9F%A5%E6%89%BE/"/>
+      <url>/2023/09/19/%E6%9C%89%E5%BA%8F%E8%A1%A8%E7%9A%84%E6%9F%A5%E6%89%BE/</url>
+      
+        <content type="html"><![CDATA[<h2 id="有序表的查找"><a href="#有序表的查找" class="headerlink" title="有序表的查找"></a>有序表的查找</h2><h3 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h3><p>有序表为各元素的key值依次排序组成的查找表<br>如：学号，座位号等</p><hr><h3 id="1-折半查找"><a href="#1-折半查找" class="headerlink" title="1.折半查找"></a>1.折半查找</h3><p>先确定待查记录的范围，然后逐步缩小范围(递归操作实现)，直到找到&#x2F;找不到为止，每次缩小范围取中间值。<br>递归调用中，各部分所填参数为：</p><table><thead><tr><th></th><th>left(real)</th><th>right(not real)</th><th>right(real)</th></tr></thead><tbody><tr><td>left_part</td><td>left</td><td>mid</td><td>mid - 1</td></tr><tr><td>right_part</td><td>mid + 1</td><td>right</td><td>right - 1</td></tr></tbody></table><p>平均查找长度：<br>$$<br>ASL&#x3D;log(n + 1) - 1<br>$$</p><hr><h3 id="2-斐波那契查找"><a href="#2-斐波那契查找" class="headerlink" title="2.斐波那契查找"></a>2.斐波那契查找</h3><p>利用斐波那契数列的性质，以相邻两个斐波那契数为边界来确定key的范围。<br>一般情况下，优于折半查找，但在最坏情况下劣于折半查找。</p><p>平均查找长度：<br>$$<br>ASL&#x3D;(n + 1)log(n + 1) - 1&#x2F;n<br>$$</p><hr><h3 id="3-索引表查找"><a href="#3-索引表查找" class="headerlink" title="3.索引表查找"></a>3.索引表查找</h3><p>将长度为n的表平分数个大小相等的区域，每个区域有s个元素，且每个区域按照顺序划出范围。查找时先寻找范围，后进一步查找。<br>效率不及折半查找。</p><p>平均查找长度(约等)：<br>$$<br>ASL&#x3D;log((n&#x2F;s) + 1) + s&#x2F;2<br>$$</p><hr><h3 id="4-二叉排序树"><a href="#4-二叉排序树" class="headerlink" title="4.二叉排序树"></a>4.二叉排序树</h3><p>一种二叉树，所有节点的左节点均小于该节点，右节点均大于该节点，形成了一种微妙的范围表示法。<br>该树特点在于动态查找有序表，可随查找过程准确定位添加新节点。</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 数据结构与算法 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 算法 </tag>
+            
+            <tag> 数据结构 </tag>
+            
+            <tag> 有序表 </tag>
+            
+            <tag> 查找算法 </tag>
             
         </tags>
       
