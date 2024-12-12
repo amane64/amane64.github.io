@@ -4,6 +4,41 @@
   
     
     <entry>
+      <title>Java数据库操作(JDBC)</title>
+      <link href="/2024/12/13/Java%E6%95%B0%E6%8D%AE%E5%BA%93%E6%93%8D%E4%BD%9C-JDBC/"/>
+      <url>/2024/12/13/Java%E6%95%B0%E6%8D%AE%E5%BA%93%E6%93%8D%E4%BD%9C-JDBC/</url>
+      
+        <content type="html"><![CDATA[<h2 id="Java数据库操作-JDBC"><a href="#Java数据库操作-JDBC" class="headerlink" title="Java数据库操作(JDBC)"></a>Java数据库操作(JDBC)</h2><blockquote><p>本文以Mysql为例</p></blockquote><h3 id="配置maven"><a href="#配置maven" class="headerlink" title="配置maven"></a>配置maven</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>mysql<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>mysql-connector-java<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">version</span>&gt;</span>8.0.32<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span></span><br></pre></td></tr></table></figure><p>将以上代码写入pom.xml内</p><hr><h3 id="编写登陆用-prooerties文件"><a href="#编写登陆用-prooerties文件" class="headerlink" title="编写登陆用.prooerties文件"></a>编写登陆用.prooerties文件</h3><figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">driverName</span>=<span class="string">com.mysql.cj.jdbc.Driver</span></span><br><span class="line"><span class="attr">url</span>=<span class="string">jdbc:mysql://localhost:3306/(base_name)?characterEncoding=UTF8&amp;autoReconnect=true&amp;useSSL=false&amp;allowPublicKeyRetrieval=true</span></span><br><span class="line"><span class="attr">username</span>=<span class="string"></span></span><br><span class="line"><span class="attr">password</span>=<span class="string"></span></span><br></pre></td></tr></table></figure><hr><h3 id="加载驱动程序"><a href="#加载驱动程序" class="headerlink" title="加载驱动程序"></a>加载驱动程序</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span>&#123;</span><br><span class="line"> Class.forName(JDBC_DRIVER);</span><br><span class="line">&#125;<span class="keyword">catch</span> Class.forName(JDBC_DRIVER);&#123;</span><br><span class="line">    se.printStackTrace();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>JDBC_DRIVER为驱动程序的地址，如MySQL8.0为”com.mysql.cj.jdbc.Driver”。</p><hr><h3 id="DriverManager类"><a href="#DriverManager类" class="headerlink" title="DriverManager类"></a>DriverManager类</h3><blockquote><p>驱动管理类<br>加载完驱动程序后，该驱动程序的实例会注册到DriverManager类中。<br>该类无需定义对象，直接调用即可。<br>可通过getConnection()方法连接到相应的数据库。</p></blockquote><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 连接到数据库</span></span><br><span class="line"><span class="comment">// 返回Connection接口对象</span></span><br><span class="line"><span class="comment">// 输入的三个形参分别为数据库地址，用户名，密码</span></span><br><span class="line">getConnection(DB_URL, USER, PASS);</span><br></pre></td></tr></table></figure><p>数据库地址：<code>jdbc:mysql://localhost:3306/[数据库名]characterEncoding=UTF8&amp;autoReconnect=true&amp;useSSL=false</code></p><hr><h3 id="Connection接口"><a href="#Connection接口" class="headerlink" title="Connection接口"></a>Connection接口</h3><blockquote><p>链接数据库接口<br>可以理解为所连接的数据库的引用。</p></blockquote><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 创建执行对象</span></span><br><span class="line"><span class="comment">// 返回Statement接口对象</span></span><br><span class="line">createStatement();</span><br><span class="line"></span><br><span class="line"><span class="comment">// 关闭并释放内存</span></span><br><span class="line">close();</span><br></pre></td></tr></table></figure><hr><h3 id="Statement接口"><a href="#Statement接口" class="headerlink" title="Statement接口"></a>Statement接口</h3><blockquote><p>执行接口，用于向数据库发送SQL语句。</p></blockquote><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 执行给定的SQL语句</span></span><br><span class="line"><span class="comment">// 返回ResultSet接口对象</span></span><br><span class="line"><span class="comment">// 形参sql为SQL语句，以字符串的形式写入</span></span><br><span class="line">executeQuery(sql);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 关闭并释放内存</span></span><br><span class="line"><span class="comment">// close();</span></span><br></pre></td></tr></table></figure><hr><h3 id="PreparedStatement接口"><a href="#PreparedStatement接口" class="headerlink" title="PreparedStatement接口"></a>PreparedStatement接口</h3><blockquote><p>执行接口，用于动态执行SQL语句。</p></blockquote><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 设置该行指定列名的值</span></span><br><span class="line"><span class="comment">// index为行数，从0开始</span></span><br><span class="line">set&lt;<span class="keyword">var</span>&gt;(<span class="type">int</span> index,  <span class="keyword">var</span> value);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 返回执行给定的SQL语句，返回改变的行数</span></span><br><span class="line">executeQuery();</span><br></pre></td></tr></table></figure><hr><h3 id="ResultSet接口"><a href="#ResultSet接口" class="headerlink" title="ResultSet接口"></a>ResultSet接口</h3><blockquote><p>暂时储存从数据库查询到的结果集，可看作一个临时表。<br>具有指向当前数据行的指针，可通过next()下移。</p></blockquote><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 获取该行指定列名的值，以var的形式返回</span></span><br><span class="line"><span class="comment">// 返回var类型（包括Object类对象）</span></span><br><span class="line">get&lt;<span class="keyword">var</span>&gt;(columnLabel);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 指针移动</span></span><br><span class="line">first();     <span class="comment">// 第一行</span></span><br><span class="line">last();      <span class="comment">// 最后一行</span></span><br><span class="line">next();      <span class="comment">// 下一行</span></span><br><span class="line">beforeFirst();    <span class="comment">// 第一行第一列</span></span><br><span class="line">afterLast();    <span class="comment">// 最后一行最后一列</span></span><br><span class="line">absolute(<span class="type">int</span> index);  <span class="comment">// 指定行号</span></span><br></pre></td></tr></table></figure><hr><h3 id="Properties类"><a href="#Properties类" class="headerlink" title="Properties类"></a>Properties类</h3><blockquote><p>读取.properties文件所存储的信息。</p></blockquote><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 读取文件</span></span><br><span class="line"><span class="comment">// FileReader为文件读取类对象，可以用new FileReader(url)代替</span></span><br><span class="line">load(FileReader);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 读取文件中信息</span></span><br><span class="line"><span class="comment">// tital为文件前的头缀</span></span><br><span class="line">getProperty(tital);</span><br></pre></td></tr></table></figure>]]></content>
+      
+      
+      <categories>
+          
+          <category> Java </category>
+          
+          <category> 数据库 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Java </tag>
+            
+            <tag> 数据库 </tag>
+            
+            <tag> JDBC </tag>
+            
+            <tag> SQL </tag>
+            
+            <tag> Mysql </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>在 Java 中运行 Python 脚本</title>
       <link href="/2024/08/15/%E5%9C%A8-Java-%E4%B8%AD%E8%BF%90%E8%A1%8C-Python-%E8%84%9A%E6%9C%AC/"/>
       <url>/2024/08/15/%E5%9C%A8-Java-%E4%B8%AD%E8%BF%90%E8%A1%8C-Python-%E8%84%9A%E6%9C%AC/</url>
@@ -187,11 +222,11 @@
             
             <tag> 前端 </tag>
             
-            <tag> Electron </tag>
-            
             <tag> vue3 </tag>
             
             <tag> Element-Plus </tag>
+            
+            <tag> Electron </tag>
             
             <tag> i18n </tag>
             
