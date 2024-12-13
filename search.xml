@@ -48,6 +48,8 @@
       
       <categories>
           
+          <category> Java </category>
+          
           <category> Python </category>
           
       </categories>
@@ -222,11 +224,11 @@
             
             <tag> 前端 </tag>
             
+            <tag> Electron </tag>
+            
             <tag> vue3 </tag>
             
             <tag> Element-Plus </tag>
-            
-            <tag> Electron </tag>
             
             <tag> i18n </tag>
             
@@ -261,9 +263,9 @@
             
             <tag> 数据结构 </tag>
             
-            <tag> 有序表 </tag>
-            
             <tag> 查找算法 </tag>
+            
+            <tag> 有序表 </tag>
             
         </tags>
       
@@ -280,6 +282,8 @@
       
       
       <categories>
+          
+          <category> Java </category>
           
           <category> Spring </category>
           
@@ -316,6 +320,8 @@
       
       <categories>
           
+          <category> Java </category>
+          
           <category> Spring </category>
           
       </categories>
@@ -348,6 +354,8 @@
       
       
       <categories>
+          
+          <category> Java </category>
           
           <category> Spring </category>
           
