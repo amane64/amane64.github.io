@@ -53,9 +53,9 @@
       
         <tags>
             
-            <tag> Python </tag>
-            
             <tag> Java </tag>
+            
+            <tag> Python </tag>
             
             <tag> 跨语言运行 </tag>
             
@@ -86,11 +86,11 @@
             
             <tag> 前端 </tag>
             
+            <tag> Electron </tag>
+            
             <tag> vue3 </tag>
             
             <tag> Element-Plus </tag>
-            
-            <tag> Electron </tag>
             
             <tag> i18n </tag>
             
@@ -255,9 +255,9 @@
       
         <tags>
             
-            <tag> 数据结构 </tag>
-            
             <tag> 算法 </tag>
+            
+            <tag> 数据结构 </tag>
             
             <tag> 查找算法 </tag>
             
@@ -279,18 +279,18 @@
       
       <categories>
           
-          <category> 数据结构与算法 </category>
-          
           <category> Java </category>
+          
+          <category> 数据结构与算法 </category>
           
       </categories>
       
       
         <tags>
             
-            <tag> 数据结构 </tag>
-            
             <tag> 算法 </tag>
+            
+            <tag> 数据结构 </tag>
             
             <tag> 二叉树 </tag>
             
