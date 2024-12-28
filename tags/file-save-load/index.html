@@ -1,7 +1,48 @@
-<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>标签: file-save/load | Amane64</title><meta name="author" content="Amane64"><meta name="copyright" content="Amane64"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta property="og:type" content="website">
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><script>function loadDevCacher() {
+  function loop() {
+    var startTime = new Date();
+    debugger;
+    if (new Date() - startTime > timeLimit) {
+      if (!open) {
+        callbacks.forEach(function(fn) {fn.call(null);});
+      }
+      open = true;
+      document.body.innerHTML = "";
+      window.stop();
+      alert('(￢︿̫̿￢☆) 你真坏，请关闭控制台！');
+    } else {
+      open = false;
+    }
+  }
+  var callbacks = [], timeLimit = 50, open = false;
+  setInterval(loop, 1);
+    return {
+      addListener: function(fn) {callbacks.push(fn);},
+      cancleListenr: function(fn) {
+        callbacks = callbacks.filter(function(v) {return v !== fn;});
+        }
+    }
+}
+function toDevtools() {
+  let num = 0; 
+  let devtools = new Date();
+  devtools.toString = function() {
+    num++;
+    if (num > 1) {
+      alert('(￢︿̫̿￢☆) 你真坏，请关闭控制台！');
+      window.location.href = "about:blank"
+      blast();
+    }
+  }
+  console.log('', devtools);
+}
+loadDevCacher().addListener(function() {window.location.reload();});
+toDevtools();</script><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>标签: file-save/load | Amane64</title><meta name="author" content="Amane64"><meta name="copyright" content="Amane64"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="分享一些编程经验与技术方案">
+<meta property="og:type" content="website">
 <meta property="og:title" content="Amane64">
 <meta property="og:url" content="https://blog.amane64.site/tags/file-save-load/index.html">
 <meta property="og:site_name" content="Amane64">
+<meta property="og:description" content="分享一些编程经验与技术方案">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://blog.amane64.site/images/avatar.png">
 <meta property="article:author" content="Amane64">
@@ -9,6 +50,10 @@
 <meta property="article:tag" content="Java">
 <meta property="article:tag" content="前端">
 <meta property="article:tag" content="后端">
+<meta property="article:tag" content="随想">
+<meta property="article:tag" content="编程">
+<meta property="article:tag" content="资源分享">
+<meta property="article:tag" content="解决方案">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://blog.amane64.site/images/avatar.png"><link rel="shortcut icon" href="/images/avatar.png"><link rel="canonical" href="https://blog.amane64.site/tags/file-save-load/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>
     (() => {
