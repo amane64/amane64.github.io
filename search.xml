@@ -4,6 +4,41 @@
   
     
     <entry>
+      <title>Spring Security（一）引入 Security 及原理简述</title>
+      <link href="/2025/01/12/Spring-Security%EF%BC%88%E4%B8%80%EF%BC%89%E5%BC%95%E5%85%A5-Spring-Security-%E5%8F%8A%E5%8E%9F%E7%90%86%E7%AE%80%E8%BF%B0/"/>
+      <url>/2025/01/12/Spring-Security%EF%BC%88%E4%B8%80%EF%BC%89%E5%BC%95%E5%85%A5-Spring-Security-%E5%8F%8A%E5%8E%9F%E7%90%86%E7%AE%80%E8%BF%B0/</url>
+      
+        <content type="html"><![CDATA[<h2 id="Spring-Security（一）引入-Spring-Security-及原理简述"><a href="#Spring-Security（一）引入-Spring-Security-及原理简述" class="headerlink" title="Spring Security（一）引入 Spring Security 及原理简述"></a>Spring Security（一）引入 Spring Security 及原理简述</h2><blockquote><p>博主前言：本以为这个就是代替传统 jwt 的插件，没想到复杂程度如此之高。Spring Security 本身是个高度自定义化的组件，必须花时间重点学习一下。以下为个人配置学习的流程，从零到权限管理、redis嵌入等步骤。</p></blockquote><h3 id="一、引入-Spring-Security"><a href="#一、引入-Spring-Security" class="headerlink" title="一、引入 Spring Security"></a>一、引入 Spring Security</h3><ol><li><p>实现简单的登录验证</p><p> 首先创建一个 spring boot 3 示例项目，只包含启动类和一个简单的 controller：</p><p> <img src="/2025/01/12/Spring-Security%EF%BC%88%E4%B8%80%EF%BC%89%E5%BC%95%E5%85%A5-Spring-Security-%E5%8F%8A%E5%8E%9F%E7%90%86%E7%AE%80%E8%BF%B0/%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84.png" alt="项目结构"></p><p> 引入的 Spring Security 依赖：</p> <figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-security<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.security<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-security-test<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">scope</span>&gt;</span>test<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure><p> 启动项目，访问8080端口，发现被重定向到 &#x2F;login，并弹出了一个登录页面：</p><blockquote><p>我配置了一个模板，这个模板不配置也可以，也是登录页面，不影响后续操作。</p></blockquote><p> <img src="/2025/01/12/Spring-Security%EF%BC%88%E4%B8%80%EF%BC%89%E5%BC%95%E5%85%A5-Spring-Security-%E5%8F%8A%E5%8E%9F%E7%90%86%E7%AE%80%E8%BF%B0/%E7%99%BB%E5%BD%95%E9%A1%B5%E9%9D%A2.png" alt="登录页面"></p><p> 默认的用户名为 user，密码由控制台给出：</p><p> <img src="/2025/01/12/Spring-Security%EF%BC%88%E4%B8%80%EF%BC%89%E5%BC%95%E5%85%A5-Spring-Security-%E5%8F%8A%E5%8E%9F%E7%90%86%E7%AE%80%E8%BF%B0/%E6%8E%A7%E5%88%B6%E5%8F%B0%E5%AF%86%E7%A0%81.png" alt="控制台密码"></p></li><li><p>Spring Security 未自定义配置时的功能</p><ul><li>重定向<code>8080</code>端口，维护默认<code>url</code></li><li>自动创建和维护一个登录账户</li><li>提供基于表单的登录和注销流程</li><li>处理各式安全问题（csrf 跨域攻击、https等）</li></ul><p> 而上述这些功能，仅仅是引入了一个依赖，自动全实现了，这就是 Spring Security 强大之处。</p><p> 若有需要，都建议使用其替代原项目中的 token 模块。</p></li></ol><hr><h3 id="二、Spring-Security-实现原理"><a href="#二、Spring-Security-实现原理" class="headerlink" title="二、Spring Security 实现原理"></a>二、Spring Security 实现原理</h3><p>官网有这么一幅图，描述了 Spring 的 Servlet 架构：</p><p><img src="/2025/01/12/Spring-Security%EF%BC%88%E4%B8%80%EF%BC%89%E5%BC%95%E5%85%A5-Spring-Security-%E5%8F%8A%E5%8E%9F%E7%90%86%E7%AE%80%E8%BF%B0/Filter%E9%93%BE1.png" alt="Filter链1"></p><blockquote><p>一般情况下，Spring 的 Servlet 架构最终抽象为 Controller，所以理解为 Controller 就行。</p></blockquote><p>Spring 对 Servlet 的支持是基于Servlet过滤器的，其结构结构大致就是这样，由<code>Filter链</code>中一个个<code>Filter</code>过滤拦截，由此实现不同功能的检验操作。</p><p>每一个 Filter 都具备以下功能：</p><ul><li>防止下游的 <code>Filter</code> 实例或 <code>Servlet</code> 被调用。在这种情况下，<code>Filter</code> 通常会使用 <code>HttpServletResponse</code> 对客户端写入响应。</li><li>修改下游的 <code>Filter</code> 实例和 <code>Servlet</code> 所使用的 <code>HttpServletRequest</code> 或 <code>HttpServletResponse</code>。</li></ul><p>也正因如此，<code>Filter</code>之间的顺序是很重要的。不过，虽然 Servlet 容器允许通过使用自己的标准来注册<code>Filter</code>实例，但它不知道 Spring 定义的<code>Bean</code>。为了让<code>Filter</code>的工作托管给<code>Bean</code>，可以通过标准的Servlet容器机制来注册 <code>DelegatingFilterProxy</code>。</p><p><img src="/2025/01/12/Spring-Security%EF%BC%88%E4%B8%80%EF%BC%89%E5%BC%95%E5%85%A5-Spring-Security-%E5%8F%8A%E5%8E%9F%E7%90%86%E7%AE%80%E8%BF%B0/Filter%E9%93%BE2.png" alt="Filter链2"></p><p><code>DelegatingFilterProxy</code>从<code>ApplicationContext</code>查找<code>Bean Filter</code>，然后调用<code>Bean Filter</code>。</p><p>然后重量级的来了：</p><p><img src="/2025/01/12/Spring-Security%EF%BC%88%E4%B8%80%EF%BC%89%E5%BC%95%E5%85%A5-Spring-Security-%E5%8F%8A%E5%8E%9F%E7%90%86%E7%AE%80%E8%BF%B0/Filter%E9%93%BE3.png" alt="Filter链3"></p><p><code>SecurityFilterChain</code>被<code>FilterChainProxy</code>定当前请求应该调用哪些 Spring Security <code>Filter</code> 实例。</p><p>换句话说，Spring Security 从原本不支持<code>Bean</code>的<code>Filter链</code>中独立出来，扩展出一条支持<code>Bean</code>的<code>Filter子链</code>。</p><p>下面这段话从官网抄的，介绍了这么做的优势：<del>（脱裤子放屁）</del></p><blockquote><p>与直接向 Servlet 容器或 DelegatingFilterProxy 注册相比，<code>FilterChainProxy</code>有很多优势。首先，它为 Spring Security 的所有 Servlet 支持提供了一个起点。由于这个原因，如果你试图对 Spring Security 的 Servlet 支持进行故障诊断，在 <code>FilterChainProxy</code> 中添加一个调试点是一个很好的开始。</p><p>其次，由于<code>FilterChainProxy</code>是 Spring Security 使用的核心，它可以执行一些不被视为可有可无的任务。 例如，它清除了<code>SecurityContext</code>以避免内存泄漏。它还应用 Spring Security 的<code>HttpFirewall</code>来保护应用程序免受某些类型的攻击。</p><p>此外，它在确定何时应该调用 <code>SecurityFilterChain</code> 方面提供了更大的灵活性。在Servlet容器中，<code>Filter</code> 实例仅基于URL被调用。 然而，<code>FilterChainProxy</code> 可以通过使用 <code>RequestMatcher</code> 接口，根据 <code>HttpServletRequest</code> 中的任何内容确定调用。</p></blockquote><p>同样地，可以存在多个<code>Filter子链</code>，虽然可能用不到：</p><p><img src="/2025/01/12/Spring-Security%EF%BC%88%E4%B8%80%EF%BC%89%E5%BC%95%E5%85%A5-Spring-Security-%E5%8F%8A%E5%8E%9F%E7%90%86%E7%AE%80%E8%BF%B0/Filter%E9%93%BE4.png" alt="Filter链4"></p><p>这就有点吓人了，不过确实如此，Spring Security 是一个高可靠性、高度自定义化的组件。</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> Java </category>
+          
+          <category> Spring </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Java </tag>
+            
+            <tag> Spring </tag>
+            
+            <tag> SpringBoot </tag>
+            
+            <tag> Spring-Security </tag>
+            
+            <tag> 加密验证 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>操作系统知识点一览</title>
       <link href="/2024/12/28/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%9F%A5%E8%AF%86%E7%82%B9%E4%B8%80%E8%A7%88/"/>
       <url>/2024/12/28/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%9F%A5%E8%AF%86%E7%82%B9%E4%B8%80%E8%A7%88/</url>
@@ -279,9 +314,9 @@
       
       <categories>
           
-          <category> 数据结构与算法 </category>
-          
           <category> Java </category>
+          
+          <category> 数据结构与算法 </category>
           
       </categories>
       
@@ -398,8 +433,6 @@
             <tag> Spring </tag>
             
             <tag> SpringBoot </tag>
-            
-            <tag> Spring-Security </tag>
             
             <tag> JWT </tag>
             
