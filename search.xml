@@ -312,9 +312,9 @@
       
         <tags>
             
-            <tag> Java </tag>
-            
             <tag> Python </tag>
+            
+            <tag> Java </tag>
             
             <tag> 跨语言运行 </tag>
             
@@ -588,9 +588,9 @@
             
             <tag> Spring-Security </tag>
             
-            <tag> 加密验证 </tag>
-            
             <tag> JWT </tag>
+            
+            <tag> 加密验证 </tag>
             
         </tags>
       
@@ -658,9 +658,9 @@
             
             <tag> SpringBoot </tag>
             
-            <tag> 加密验证 </tag>
-            
             <tag> JWT </tag>
+            
+            <tag> 加密验证 </tag>
             
         </tags>
       
