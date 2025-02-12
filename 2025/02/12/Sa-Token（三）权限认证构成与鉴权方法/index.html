@@ -1,0 +1,444 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><script>function loadDevCacher() {
+  function loop() {
+    var startTime = new Date();
+    //- debugger;
+    if (new Date() - startTime > timeLimit) {
+      if (!open) {
+        callbacks.forEach(function(fn) {fn.call(null);});
+      }
+      open = true;
+      document.body.innerHTML = "";
+      window.stop();
+      alert('(￢︿̫̿￢☆) 你真坏，请关闭控制台！');
+    } else {
+      open = false;
+    }
+  }
+  var callbacks = [], timeLimit = 50, open = false;
+  setInterval(loop, 1);
+    return {
+      addListener: function(fn) {callbacks.push(fn);},
+      cancleListenr: function(fn) {
+        callbacks = callbacks.filter(function(v) {return v !== fn;});
+        }
+    }
+}
+function toDevtools() {
+  let num = 0; 
+  let devtools = new Date();
+  devtools.toString = function() {
+    num++;
+    if (num > 1) {
+      alert('(￢︿̫̿￢☆) 你真坏，请关闭控制台！');
+      window.location.href = "about:blank"
+      blast();
+    }
+  }
+  console.log('', devtools);
+}
+loadDevCacher().addListener(function() {window.location.reload();});
+toDevtools();</script><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Sa-Token（三）权限认证构成与鉴权方法 | Amane64</title><meta name="author" content="Amane64"><meta name="copyright" content="Amane64"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="权限认证构成与鉴权方法">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Sa-Token（三）权限认证构成与鉴权方法">
+<meta property="og:url" content="https://blog.amane64.site/2025/02/12/Sa-Token%EF%BC%88%E4%B8%89%EF%BC%89%E6%9D%83%E9%99%90%E8%AE%A4%E8%AF%81%E6%9E%84%E6%88%90%E4%B8%8E%E9%89%B4%E6%9D%83%E6%96%B9%E6%B3%95/index.html">
+<meta property="og:site_name" content="Amane64">
+<meta property="og:description" content="权限认证构成与鉴权方法">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://blog.amane64.site/images/covers/sa-token.png">
+<meta property="article:published_time" content="2025-02-12T12:40:35.000Z">
+<meta property="article:modified_time" content="2025-02-12T12:41:29.598Z">
+<meta property="article:author" content="Amane64">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="Spring">
+<meta property="article:tag" content="SpringBoot">
+<meta property="article:tag" content="加密验证">
+<meta property="article:tag" content="Sa-Token">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://blog.amane64.site/images/covers/sa-token.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Sa-Token（三）权限认证构成与鉴权方法",
+  "url": "https://blog.amane64.site/2025/02/12/Sa-Token%EF%BC%88%E4%B8%89%EF%BC%89%E6%9D%83%E9%99%90%E8%AE%A4%E8%AF%81%E6%9E%84%E6%88%90%E4%B8%8E%E9%89%B4%E6%9D%83%E6%96%B9%E6%B3%95/",
+  "image": "https://blog.amane64.site/images/covers/sa-token.png",
+  "datePublished": "2025-02-12T12:40:35.000Z",
+  "dateModified": "2025-02-12T12:41:29.598Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Amane64",
+      "url": "https://blog.amane64.site/"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/images/avatar.png"><link rel="canonical" href="https://blog.amane64.site/2025/02/12/Sa-Token%EF%BC%88%E4%B8%89%EF%BC%89%E6%9D%83%E9%99%90%E8%AE%A4%E8%AF%81%E6%9E%84%E6%88%90%E4%B8%8E%E9%89%B4%E6%9D%83%E6%96%B9%E6%B3%95/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!true && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'undefined')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'undefined')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          const mediaQueryDark = window.matchMedia('(prefers-color-scheme: dark)')
+          const mediaQueryLight = window.matchMedia('(prefers-color-scheme: light)')
+          
+          if (theme === undefined) {
+            if (mediaQueryLight.matches) activateLightMode()
+            else if (mediaQueryDark.matches) activateDarkMode()
+            else {
+              const hour = new Date().getHours()
+              const isNight = hour <= 6 || hour >= 18
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            mediaQueryDark.addEventListener('change', () => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else {
+            theme === 'light' ? activateLightMode() : activateDarkMode()
+          }
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":5,"unescape":true,"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简"},
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":150,"highlightFullpage":true,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: true,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":400,"languages":{"author":"作者: Amane64","link":"链接: ","source":"来源: Amane64","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Sa-Token（三）权限认证构成与鉴权方法',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/custom.css" media="defer" onload="this.media='all'"><link rel="stylesheet" href="/css/aside_conten.css" media="defer" onload="this.media='all'"><link rel="stylesheet" href="/css/progress_bar.css" media="defer" onload="this.media='all'"><link rel="stylesheet" href="https://cdn1.tianli0.top/npm/element-ui@2.15.6/packages/theme-chalk/lib/index.css"><!-- hexo injector head_end start --><link rel="stylesheet" href="https://npm.elemecdn.com/hexo-butterfly-swiper/lib/swiper.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://npm.elemecdn.com/hexo-butterfly-swiper/lib/swiperstyle.css" media="print" onload="this.media='all'"><!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.3.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><script>(()=>{
+  const $loadingBox = document.getElementById('loading-box')
+  const $body = document.body
+  const preloader = {
+    endLoading: () => {
+      $body.style.overflow = ''
+      $loadingBox.classList.add('loaded')
+    },
+    initLoading: () => {
+      $body.style.overflow = 'hidden'
+      $loadingBox.classList.remove('loaded')
+    }
+  }
+
+  preloader.initLoading()
+  window.addEventListener('load', preloader.endLoading)
+
+  if (true) {
+    btf.addGlobalFn('pjaxSend', preloader.initLoading, 'preloader_init')
+    btf.addGlobalFn('pjaxComplete', preloader.endLoading, 'preloader_end')
+  }
+})()</script><div id="web_bg" style="background-image: url(/images/main_bg.png);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/images/avatar.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">26</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">40</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">11</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/links/"><i class="fa-fw fas fa-link"></i><span> 链接</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header" style="background-image: url(/images/covers/sa-token.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><img class="site-icon" src="/images/avatar.png" alt="Logo"><span class="site-name">Amane64</span></a><a class="nav-page-title" href="/"><span class="site-name">Sa-Token（三）权限认证构成与鉴权方法</span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/links/"><i class="fa-fw fas fa-link"></i><span> 链接</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Sa-Token（三）权限认证构成与鉴权方法</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="fa-fw post-meta-icon far fa-calendar-alt"></i><span class="post-meta-label">发表于</span><time datetime="2025-02-12T12:40:35.000Z" title="发表于 2025-02-12 20:40:35">2025-02-12</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Java/">Java</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Spring/">Spring</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Sa-Token/">Sa-Token</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">2.4k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>9分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><blockquote>
+<p><strong>目录</strong><br>一、<a href="https://blog.amane64.site/2025/02/11/Sa-Token%EF%BC%88%E4%B8%80%EF%BC%89%E7%AE%80%E4%BB%8B%E4%B8%8E%E9%85%8D%E7%BD%AE/">简介与配置</a><br>二、<a href="https://blog.amane64.site/2025/02/12/Sa-Token%EF%BC%88%E4%BA%8C%EF%BC%89%E5%AE%9E%E7%8E%B0%E7%99%BB%E5%BD%95%E6%B3%A8%E9%94%80%E6%93%8D%E4%BD%9C/">实现登录注销操作</a><br>三、权限认证构成与鉴权方法  &lt;— 你在这里 ( •̀ ω •́ )y<br>四、<a href="">RBAC 结构实现</a></p>
+</blockquote>
+<h2 id="Sa-Token（三）权限认证构成与鉴权方法"><a href="#Sa-Token（三）权限认证构成与鉴权方法" class="headerlink" title="Sa-Token（三）权限认证构成与鉴权方法"></a>Sa-Token（三）权限认证构成与鉴权方法</h2><blockquote>
+<p>[!NOTE]</p>
+<p>博主前言：Spring Security 的学习真是惊掉我下巴，就一个鉴权功能，搞那么多复杂概念，又是过滤器链又是注入的，花了我一个星期左右，实际上还很不好用（未知错误给前端返回 401 是真绷不住）。Sa-Token 作为国产鉴权，性能更强的同时简化开发的程度相比 Spring Security 起码有十倍不止。最近我还注意到对标 Spring 生态的 Solon 框架，也是国产，性能提升3倍多，内存占用减少 50%+，打包还更小，真不知道这些工作为什么老外都做的这么复杂。</p>
+</blockquote>
+<p>有了登录，接下来就要对接口配置拦截，进一步地还能设置权限。</p>
+<p>在这之前，我们先来了解一下 Sa-Token 权限认证的构造。</p>
+<hr>
+<h3 id="一、权限类型简介"><a href="#一、权限类型简介" class="headerlink" title="一、权限类型简介"></a>一、权限类型简介</h3><p>Sa-Token 的权限是经典的<code>RBAC</code>结构，分为两种类型：</p>
+<ul>
+<li>权限码：具体的某种权限，如<strong>新增</strong>，<strong>修改</strong>等</li>
+<li>角色：用户的抽象概念，或者说是权限码的集合，如<strong>管理员拥有所有权限</strong>，<strong>普通用户只拥有浏览和提交权限等</strong></li>
+</ul>
+<blockquote>
+<p>[!IMPORTANT]</p>
+<p>实际上，Sa-Token 中的角色与权限码并没有强关联，为用户注入权限时，需要手动将二者均注入一遍</p>
+</blockquote>
+<blockquote>
+<p>[!TIP]</p>
+<p>关于什么是<code>RBAC</code>结构，参考这篇文章：<a href="https://blog.amane64.site/2025/01/15/Spring%20Security%EF%BC%88%E5%85%AD%EF%BC%89RBAC%20%E7%BB%93%E6%9E%84%E5%AE%9E%E7%8E%B0/">Spring Security（六）RBAC 结构实现</a></p>
+</blockquote>
+<p>对于<strong>权限码</strong>：为程序预先制定，可<strong>定义为常量</strong>调用。</p>
+<p>对于<strong>角色</strong>：可由指定权限的用户添加&#x2F;修改，则需<strong>定义数据表存储</strong>。</p>
+<hr>
+<h3 id="二、三种鉴权方法"><a href="#二、三种鉴权方法" class="headerlink" title="二、三种鉴权方法"></a>二、三种鉴权方法</h3><p>先了解鉴权方法是如何调用的，之后再实际上手。</p>
+<blockquote>
+<p>[!IMPORTANT]</p>
+<p>一般情况下，验证不通过时会抛出<code>NotPermissionException</code>（权限码）和<code>NotRoleException</code>（角色）这两种异常。</p>
+</blockquote>
+<ol>
+<li>静态方法鉴权：</li>
+</ol>
+<p>调用<code>StpUtil</code>的静态方法即可实现鉴权，可以调用鉴权失败时返回<code>false</code>而不抛出异常的方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 权限码 */</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 获取：当前账号所拥有的权限集合</span></span><br><span class="line">StpUtil.getPermissionList();</span><br><span class="line"></span><br><span class="line"><span class="comment">// 判断：当前账号是否含有指定权限, 返回 true 或 false</span></span><br><span class="line">StpUtil.hasPermission(<span class="string">&quot;user.add&quot;</span>);        </span><br><span class="line"></span><br><span class="line"><span class="comment">// 校验：当前账号是否含有指定权限, 如果验证未通过，则抛出异常: NotPermissionException </span></span><br><span class="line">StpUtil.checkPermission(<span class="string">&quot;user.add&quot;</span>);        </span><br><span class="line"></span><br><span class="line"><span class="comment">// 校验：当前账号是否含有指定权限 [指定多个，必须全部验证通过]</span></span><br><span class="line">StpUtil.checkPermissionAnd(<span class="string">&quot;user.add&quot;</span>, <span class="string">&quot;user.delete&quot;</span>, <span class="string">&quot;user.get&quot;</span>);        </span><br><span class="line"></span><br><span class="line"><span class="comment">// 校验：当前账号是否含有指定权限 [指定多个，只要其一验证通过即可]</span></span><br><span class="line">StpUtil.checkPermissionOr(<span class="string">&quot;user.add&quot;</span>, <span class="string">&quot;user.delete&quot;</span>, <span class="string">&quot;user.get&quot;</span>); </span><br><span class="line"></span><br><span class="line"><span class="comment">/* 角色 */</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 获取：当前账号所拥有的角色集合</span></span><br><span class="line">StpUtil.getRoleList();</span><br><span class="line"></span><br><span class="line"><span class="comment">// 判断：当前账号是否拥有指定角色, 返回 true 或 false</span></span><br><span class="line">StpUtil.hasRole(<span class="string">&quot;super-admin&quot;</span>);        </span><br><span class="line"></span><br><span class="line"><span class="comment">// 校验：当前账号是否含有指定角色标识, 如果验证未通过，则抛出异常: NotRoleException</span></span><br><span class="line">StpUtil.checkRole(<span class="string">&quot;super-admin&quot;</span>);        </span><br><span class="line"></span><br><span class="line"><span class="comment">// 校验：当前账号是否含有指定角色标识 [指定多个，必须全部验证通过]</span></span><br><span class="line">StpUtil.checkRoleAnd(<span class="string">&quot;super-admin&quot;</span>, <span class="string">&quot;shop-admin&quot;</span>);        </span><br><span class="line"></span><br><span class="line"><span class="comment">// 校验：当前账号是否含有指定角色标识 [指定多个，只要其一验证通过即可] </span></span><br><span class="line">StpUtil.checkRoleOr(<span class="string">&quot;super-admin&quot;</span>, <span class="string">&quot;shop-admin&quot;</span>);        </span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>注解鉴权：</li>
+</ol>
+<p>我们可以使用注解在方法上标注，没有权限的用户调用该方法会抛出对应的权限异常。</p>
+<blockquote>
+<p>[!WARNING]</p>
+<p>不建议在<code>Controller</code>层以外的方法使用注解鉴权，虽然 Sa-Token 提供了额外包实现其他位置的注解鉴权，但这样做会徒增设计复杂度，后续难以维护。</p>
+</blockquote>
+<p>首先，在<code>Web</code>层配置类注册 Sa-Token 拦截器</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 注册 web 层相关组件</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> Amane64</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">WebMvcConfig</span> <span class="keyword">extends</span> <span class="title class_">WebMvcConfigurationSupport</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 注册 Sa-Token 拦截器</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">addInterceptors</span><span class="params">(InterceptorRegistry registry)</span> &#123;</span><br><span class="line">        log.info(<span class="string">&quot;注册 Sa-Token 拦截器&quot;</span>);</span><br><span class="line">        registry.addInterceptor(<span class="keyword">new</span> <span class="title class_">SaInterceptor</span>()).addPathPatterns(<span class="string">&quot;/**&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后就可以使用注解鉴权了，使用例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 登录校验：只有登录之后才能进入该方法 </span></span><br><span class="line"><span class="meta">@SaCheckLogin</span>                        </span><br><span class="line"><span class="meta">@RequestMapping(&quot;info&quot;)</span></span><br><span class="line"><span class="keyword">public</span> String <span class="title function_">info</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;查询用户信息&quot;</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 角色校验：必须具有指定角色才能进入该方法 </span></span><br><span class="line"><span class="meta">@SaCheckRole(&quot;super-admin&quot;)</span>        </span><br><span class="line"><span class="meta">@RequestMapping(&quot;add&quot;)</span></span><br><span class="line"><span class="keyword">public</span> String <span class="title function_">add</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;用户增加&quot;</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 权限校验：必须具有指定权限才能进入该方法 </span></span><br><span class="line"><span class="meta">@SaCheckPermission(&quot;user-add&quot;)</span>        </span><br><span class="line"><span class="meta">@RequestMapping(&quot;add&quot;)</span></span><br><span class="line"><span class="keyword">public</span> String <span class="title function_">add</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;用户增加&quot;</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 二级认证校验：必须二级认证之后才能进入该方法 </span></span><br><span class="line"><span class="meta">@SaCheckSafe()</span>        </span><br><span class="line"><span class="meta">@RequestMapping(&quot;add&quot;)</span></span><br><span class="line"><span class="keyword">public</span> String <span class="title function_">add</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;用户增加&quot;</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Http Basic 校验：只有通过 Http Basic 认证后才能进入该方法 </span></span><br><span class="line"><span class="meta">@SaCheckHttpBasic(account = &quot;sa:123456&quot;)</span></span><br><span class="line"><span class="meta">@RequestMapping(&quot;add&quot;)</span></span><br><span class="line"><span class="keyword">public</span> String <span class="title function_">add</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;用户增加&quot;</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Http Digest 校验：只有通过 Http Digest 认证后才能进入该方法 </span></span><br><span class="line"><span class="meta">@SaCheckHttpDigest(value = &quot;sa:123456&quot;)</span></span><br><span class="line"><span class="meta">@RequestMapping(&quot;add&quot;)</span></span><br><span class="line"><span class="keyword">public</span> String <span class="title function_">add</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;用户增加&quot;</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 校验当前账号是否被封禁 comment 服务，如果已被封禁会抛出异常，无法进入方法 </span></span><br><span class="line"><span class="meta">@SaCheckDisable(&quot;comment&quot;)</span>                </span><br><span class="line"><span class="meta">@RequestMapping(&quot;send&quot;)</span></span><br><span class="line"><span class="keyword">public</span> String <span class="title function_">send</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;查询用户信息&quot;</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// @SaCheckRole与@SaCheckPermission注解可设置校验模式</span></span><br><span class="line"><span class="comment">// mode有两种取值：</span></span><br><span class="line"><span class="comment">// SaMode.AND，标注一组权限，会话必须全部具有才可通过校验。</span></span><br><span class="line"><span class="comment">// SaMode.OR，标注一组权限，会话只要具有其一即可通过校验。</span></span><br><span class="line"><span class="comment">// 注解式鉴权：只要具有其中一个权限即可通过校验 </span></span><br><span class="line"><span class="meta">@RequestMapping(&quot;atJurOr&quot;)</span></span><br><span class="line"><span class="meta">@SaCheckPermission(value = &#123;&quot;user-add&quot;, &quot;user-all&quot;, &quot;user-delete&quot;&#125;, mode = SaMode.OR)</span>        </span><br><span class="line"><span class="keyword">public</span> SaResult <span class="title function_">atJurOr</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> SaResult.data(<span class="string">&quot;用户信息&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 角色权限双重 “or校验”：具备指定权限或者指定角色即可通过校验</span></span><br><span class="line"><span class="meta">@RequestMapping(&quot;userAdd&quot;)</span></span><br><span class="line"><span class="comment">// 需要角色 admin</span></span><br><span class="line"><span class="meta">@SaCheckPermission(value = &quot;user.add&quot;, orRole = &quot;admin&quot;)</span></span><br><span class="line"><span class="comment">// 需要三个角色其一即可</span></span><br><span class="line"><span class="meta">@SaCheckPermission(value = &quot;user.add&quot;, orRole = &#123;&quot;admin&quot;, &quot;manager&quot;, &quot;staff&quot;&#125;)</span>  </span><br><span class="line"><span class="comment">// 需要同时具有三个角色</span></span><br><span class="line"><span class="meta">@SaCheckPermission(value = &quot;user.add&quot;, orRole = &#123;&quot;admin, manager, staff&quot;&#125;)</span>         </span><br><span class="line"><span class="keyword">public</span> SaResult <span class="title function_">userAdd</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> SaResult.data(<span class="string">&quot;用户信息&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 使用 @SaIgnore 可表示一个接口忽略认证</span></span><br><span class="line"><span class="comment">// @SaIgnore 同样可以忽略掉 Sa-Token 拦截器中的路由鉴权</span></span><br><span class="line"><span class="meta">@SaIgnore</span></span><br><span class="line"><span class="meta">@RequestMapping(&quot;getList&quot;)</span></span><br><span class="line"><span class="keyword">public</span> SaResult <span class="title function_">getList</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="comment">// ... </span></span><br><span class="line">    <span class="keyword">return</span> SaResult.ok(); </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 在 `@SaCheckOr` 中可以指定多个注解，只要当前会话满足其中一个注解即可通过验证，进入方法。</span></span><br><span class="line"><span class="meta">@SaCheckOr(</span></span><br><span class="line"><span class="meta">        login = @SaCheckLogin,</span></span><br><span class="line"><span class="meta">        role = @SaCheckRole(&quot;admin&quot;),</span></span><br><span class="line"><span class="meta">        permission = @SaCheckPermission(&quot;user.add&quot;),</span></span><br><span class="line"><span class="meta">        safe = @SaCheckSafe(&quot;update-password&quot;),</span></span><br><span class="line"><span class="meta">        httpBasic = @SaCheckHttpBasic(account = &quot;sa:123456&quot;),</span></span><br><span class="line"><span class="meta">        disable = @SaCheckDisable(&quot;submit-orders&quot;)</span></span><br><span class="line"><span class="meta">)</span></span><br><span class="line"><span class="meta">@RequestMapping(&quot;test&quot;)</span></span><br><span class="line"><span class="keyword">public</span> SaResult <span class="title function_">test</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="comment">// ... </span></span><br><span class="line">    <span class="keyword">return</span> SaResult.ok(); </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 当前客户端只要有 [ login 账号登录] 或者 [user 账号登录] 其一，就可以通过验证进入方法。</span></span><br><span class="line"><span class="comment">//         注意：`type = &quot;login&quot;` 和 `type = &quot;user&quot;` 是多账号模式章节的扩展属性，此处你可以先略过这个知识点。</span></span><br><span class="line"><span class="meta">@SaCheckOr(</span></span><br><span class="line"><span class="meta">    login = &#123; @SaCheckLogin(type = &quot;login&quot;), @SaCheckLogin(type = &quot;user&quot;) &#125;</span></span><br><span class="line"><span class="meta">)</span></span><br><span class="line"><span class="meta">@RequestMapping(&quot;test&quot;)</span></span><br><span class="line"><span class="keyword">public</span> SaResult <span class="title function_">test</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="comment">// ... </span></span><br><span class="line">    <span class="keyword">return</span> SaResult.ok(); </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 当你在一个方法上写多个注解鉴权时，其默认就是要满足所有注解规则后，才可以进入方法，只要有一个不满足，就会抛出异常</span></span><br><span class="line"><span class="meta">@SaCheckLogin</span></span><br><span class="line"><span class="meta">@SaCheckRole(&quot;admin&quot;)</span></span><br><span class="line"><span class="meta">@SaCheckPermission(&quot;user.add&quot;)</span></span><br><span class="line"><span class="meta">@RequestMapping(&quot;test&quot;)</span></span><br><span class="line"><span class="keyword">public</span> SaResult <span class="title function_">test</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="comment">// ... </span></span><br><span class="line">    <span class="keyword">return</span> SaResult.ok(); </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>路由拦截鉴权：</li>
+</ol>
+<p>实际开发中，我们常有登录拦截相关的需求，即项目中所有接口均需要登录认证，只有 “登录接口” 本身对外开放，在这个需求中我们真正需要的是一种基于路由拦截的鉴权模式。</p>
+<p>我们在注解鉴权中注册了 Sa-Token 拦截器，而路由拦截鉴权正是在该拦截器上进行编辑配置的：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* 注册 Sa-Token 拦截器</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">addInterceptors</span><span class="params">(InterceptorRegistry registry)</span> &#123;</span><br><span class="line">    log.info(<span class="string">&quot;注册 Sa-Token 拦截器&quot;</span>);</span><br><span class="line">    registry.addInterceptor(</span><br><span class="line">        <span class="comment">// 绑定 checkLogin 方法，对路由进行登录验证</span></span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">SaInterceptor</span>(handle -&gt; StpUtil.checkLogin()))</span><br><span class="line">        .addPathPatterns(<span class="string">&quot;/**&quot;</span>)</span><br><span class="line">        <span class="comment">// 放行登录路由接口</span></span><br><span class="line">        .excludePathPatterns(<span class="string">&quot;/login&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如此，即配置了最基础的登录路由拦截，除登录接口以外均需要登录才可访问。</p>
+<p>读者亦可采用更复杂的配置，以此实现一些特殊的逻辑功能（如多端多权）：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">SaTokenConfigure</span> <span class="keyword">implements</span> <span class="title class_">WebMvcConfigurer</span> &#123;</span><br><span class="line">    <span class="comment">// 注册 Sa-Token 的拦截器</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">addInterceptors</span><span class="params">(InterceptorRegistry registry)</span> &#123;</span><br><span class="line">        <span class="comment">// 注册路由拦截器，自定义认证规则 </span></span><br><span class="line">        registry.addInterceptor(<span class="keyword">new</span> <span class="title class_">SaInterceptor</span>(handler -&gt; &#123;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 登录校验 -- 拦截所有路由，并排除/user/doLogin 用于开放登录 </span></span><br><span class="line">            SaRouter.match(<span class="string">&quot;/**&quot;</span>, <span class="string">&quot;/user/doLogin&quot;</span>, r -&gt; StpUtil.checkLogin());</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 角色校验 -- 拦截以 admin 开头的路由，必须具备 admin 角色或者 super-admin 角色才可以通过认证 </span></span><br><span class="line">            SaRouter.match(<span class="string">&quot;/admin/**&quot;</span>, r -&gt; StpUtil.checkRoleOr(<span class="string">&quot;admin&quot;</span>, <span class="string">&quot;super-admin&quot;</span>));</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 权限校验 -- 不同模块校验不同权限 </span></span><br><span class="line">            SaRouter.match(<span class="string">&quot;/user/**&quot;</span>, r -&gt; StpUtil.checkPermission(<span class="string">&quot;user&quot;</span>));</span><br><span class="line">            SaRouter.match(<span class="string">&quot;/admin/**&quot;</span>, r -&gt; StpUtil.checkPermission(<span class="string">&quot;admin&quot;</span>));</span><br><span class="line">            SaRouter.match(<span class="string">&quot;/goods/**&quot;</span>, r -&gt; StpUtil.checkPermission(<span class="string">&quot;goods&quot;</span>));</span><br><span class="line">            SaRouter.match(<span class="string">&quot;/orders/**&quot;</span>, r -&gt; StpUtil.checkPermission(<span class="string">&quot;orders&quot;</span>));</span><br><span class="line">            SaRouter.match(<span class="string">&quot;/notice/**&quot;</span>, r -&gt; StpUtil.checkPermission(<span class="string">&quot;notice&quot;</span>));</span><br><span class="line">            SaRouter.match(<span class="string">&quot;/comment/**&quot;</span>, r -&gt; StpUtil.checkPermission(<span class="string">&quot;comment&quot;</span>));</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 甚至你可以随意的写一个打印语句</span></span><br><span class="line">            SaRouter.match(<span class="string">&quot;/**&quot;</span>, r -&gt; System.out.println(<span class="string">&quot;----啦啦啦----&quot;</span>));</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 连缀写法</span></span><br><span class="line">            SaRouter.match(<span class="string">&quot;/**&quot;</span>).check(r -&gt; System.out.println(<span class="string">&quot;----啦啦啦----&quot;</span>));</span><br><span class="line"></span><br><span class="line">        &#125;)).addPathPatterns(<span class="string">&quot;/**&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://blog.amane64.site">Amane64</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://blog.amane64.site/2025/02/12/Sa-Token%EF%BC%88%E4%B8%89%EF%BC%89%E6%9D%83%E9%99%90%E8%AE%A4%E8%AF%81%E6%9E%84%E6%88%90%E4%B8%8E%E9%89%B4%E6%9D%83%E6%96%B9%E6%B3%95/">https://blog.amane64.site/2025/02/12/Sa-Token（三）权限认证构成与鉴权方法/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://blog.amane64.site" target="_blank">Amane64</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Java/">Java</a><a class="post-meta__tags" href="/tags/Spring/">Spring</a><a class="post-meta__tags" href="/tags/SpringBoot/">SpringBoot</a><a class="post-meta__tags" href="/tags/%E5%8A%A0%E5%AF%86%E9%AA%8C%E8%AF%81/">加密验证</a><a class="post-meta__tags" href="/tags/Sa-Token/">Sa-Token</a></div><div class="post-share"><div class="social-share" data-image="/images/covers/sa-token.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/2025/02/12/Sa-Token%EF%BC%88%E4%BA%8C%EF%BC%89%E5%AE%9E%E7%8E%B0%E7%99%BB%E5%BD%95%E6%B3%A8%E9%94%80%E6%93%8D%E4%BD%9C/" title="Sa-Token（二）实现登录注销操作"><img class="cover" src="/images/covers/sa-token.png" onerror="onerror=null;src='/images/image_missing.jpg'" alt="cover of next post"><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Sa-Token（二）实现登录注销操作</div></div><div class="info-2"><div class="info-item-1">实现接入数据库的登录注销操作</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2025/02/11/Sa-Token%EF%BC%88%E4%B8%80%EF%BC%89%E7%AE%80%E4%BB%8B%E4%B8%8E%E9%85%8D%E7%BD%AE/" title="Sa-Token（一）简介与配置"><img class="cover" src="/images/covers/sa-token.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-02-11</div><div class="info-item-2">Sa-Token（一）简介与配置</div></div><div class="info-2"><div class="info-item-1">国产超简洁鉴权框架</div></div></div></a><a class="pagination-related" href="/2025/02/12/Sa-Token%EF%BC%88%E4%BA%8C%EF%BC%89%E5%AE%9E%E7%8E%B0%E7%99%BB%E5%BD%95%E6%B3%A8%E9%94%80%E6%93%8D%E4%BD%9C/" title="Sa-Token（二）实现登录注销操作"><img class="cover" src="/images/covers/sa-token.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-02-12</div><div class="info-item-2">Sa-Token（二）实现登录注销操作</div></div><div class="info-2"><div class="info-item-1">实现接入数据库的登录注销操作</div></div></div></a><a class="pagination-related" href="/2023/07/18/JWT%E4%BB%A4%E7%89%8C%E7%94%9F%E6%88%90%E4%B8%8E%E8%A7%A3%E6%9E%90/" title="JWT令牌生成与解析"><img class="cover" src="/images/covers/Java.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-07-18</div><div class="info-item-2">JWT令牌生成与解析</div></div><div class="info-2"><div class="info-item-1">JWT令牌生成与解析</div></div></div></a><a class="pagination-related" href="/2025/01/17/Spring%20Security%EF%BC%88%E4%B8%83%EF%BC%89%E8%87%AA%E5%AE%9A%E4%B9%89%E5%93%8D%E5%BA%94%E5%BC%8F%E7%99%BB%E5%BD%95%E4%B8%8E%20JWT%20%E9%85%8D%E7%BD%AE/" title="Spring Security（七）自定义响应式登录与 JWT 配置"><img class="cover" src="/images/covers/Java.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-01-17</div><div class="info-item-2">Spring Security（七）自定义响应式登录与 JWT 配置</div></div><div class="info-2"><div class="info-item-1">自定义响应式登录与 JWT 配置</div></div></div></a><a class="pagination-related" href="/2025/01/15/Spring%20Security%EF%BC%88%E4%BA%94%EF%BC%89%E8%A7%92%E8%89%B2%E6%9D%83%E9%99%90%E7%AE%A1%E7%90%86%E5%9F%BA%E7%A1%80/" title="Spring Security（五）角色权限管理基础"><img class="cover" src="/images/covers/Java.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-01-15</div><div class="info-item-2">Spring Security（五）角色权限管理基础</div></div><div class="info-2"><div class="info-item-1">角色权限管理基础</div></div></div></a><a class="pagination-related" href="/2025/01/17/Spring%20Security%EF%BC%88%E5%85%AB%EF%BC%89%E9%9B%86%E6%88%90%20Redis/" title="Spring Security（八）集成 Redis"><img class="cover" src="/images/covers/Java.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-01-17</div><div class="info-item-2">Spring Security（八）集成 Redis</div></div><div class="info-2"><div class="info-item-1">Spring Security 集成 Redis</div></div></div></a></div></div><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="twikoo-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/images/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Amane64</div><div class="author-info-description">分享一些编程经验与技术方案</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">26</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">40</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">11</div></a></div><div class="card-info-social-icons"><a class="social-icon" href="https://blog.amane64.site/about/" target="_blank" title="QQ"><i class="fab fa-qq" style="color: #1296db;"></i></a><a class="social-icon" href="https://blog.amane64.site/about/" target="_blank" title="微信"><i class="fab fa-weixin" style="color: #07c160;"></i></a><a class="social-icon" href="https://github.com/amane64" target="_blank" title="Github"><i class="fab fa-github" style="color: #ffffff;"></i></a><a class="social-icon" href="https://gitee.com/amane64" target="_blank" title="Gitee"><i class="fab fa-git" style="color: #c71d23;"></i></a><a class="social-icon" href="mailto:amane64@163.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #FFA500;"></i></a></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Sa-Token%EF%BC%88%E4%B8%89%EF%BC%89%E6%9D%83%E9%99%90%E8%AE%A4%E8%AF%81%E6%9E%84%E6%88%90%E4%B8%8E%E9%89%B4%E6%9D%83%E6%96%B9%E6%B3%95"><span class="toc-text">Sa-Token（三）权限认证构成与鉴权方法</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E6%9D%83%E9%99%90%E7%B1%BB%E5%9E%8B%E7%AE%80%E4%BB%8B"><span class="toc-text">一、权限类型简介</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E4%B8%89%E7%A7%8D%E9%89%B4%E6%9D%83%E6%96%B9%E6%B3%95"><span class="toc-text">二、三种鉴权方法</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2025/02/12/Sa-Token%EF%BC%88%E4%B8%89%EF%BC%89%E6%9D%83%E9%99%90%E8%AE%A4%E8%AF%81%E6%9E%84%E6%88%90%E4%B8%8E%E9%89%B4%E6%9D%83%E6%96%B9%E6%B3%95/" title="Sa-Token（三）权限认证构成与鉴权方法"><img src="/images/covers/sa-token.png" onerror="this.onerror=null;this.src='/images/image_missing.jpg'" alt="Sa-Token（三）权限认证构成与鉴权方法"/></a><div class="content"><a class="title" href="/2025/02/12/Sa-Token%EF%BC%88%E4%B8%89%EF%BC%89%E6%9D%83%E9%99%90%E8%AE%A4%E8%AF%81%E6%9E%84%E6%88%90%E4%B8%8E%E9%89%B4%E6%9D%83%E6%96%B9%E6%B3%95/" title="Sa-Token（三）权限认证构成与鉴权方法">Sa-Token（三）权限认证构成与鉴权方法</a><time datetime="2025-02-12T12:40:35.000Z" title="发表于 2025-02-12 20:40:35">2025-02-12</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/02/12/Sa-Token%EF%BC%88%E4%BA%8C%EF%BC%89%E5%AE%9E%E7%8E%B0%E7%99%BB%E5%BD%95%E6%B3%A8%E9%94%80%E6%93%8D%E4%BD%9C/" title="Sa-Token（二）实现登录注销操作"><img src="/images/covers/sa-token.png" onerror="this.onerror=null;this.src='/images/image_missing.jpg'" alt="Sa-Token（二）实现登录注销操作"/></a><div class="content"><a class="title" href="/2025/02/12/Sa-Token%EF%BC%88%E4%BA%8C%EF%BC%89%E5%AE%9E%E7%8E%B0%E7%99%BB%E5%BD%95%E6%B3%A8%E9%94%80%E6%93%8D%E4%BD%9C/" title="Sa-Token（二）实现登录注销操作">Sa-Token（二）实现登录注销操作</a><time datetime="2025-02-11T17:15:48.000Z" title="发表于 2025-02-12 01:15:48">2025-02-12</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/02/11/Sa-Token%EF%BC%88%E4%B8%80%EF%BC%89%E7%AE%80%E4%BB%8B%E4%B8%8E%E9%85%8D%E7%BD%AE/" title="Sa-Token（一）简介与配置"><img src="/images/covers/sa-token.png" onerror="this.onerror=null;this.src='/images/image_missing.jpg'" alt="Sa-Token（一）简介与配置"/></a><div class="content"><a class="title" href="/2025/02/11/Sa-Token%EF%BC%88%E4%B8%80%EF%BC%89%E7%AE%80%E4%BB%8B%E4%B8%8E%E9%85%8D%E7%BD%AE/" title="Sa-Token（一）简介与配置">Sa-Token（一）简介与配置</a><time datetime="2025-02-11T10:22:53.000Z" title="发表于 2025-02-11 18:22:53">2025-02-11</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/01/26/%E5%A4%9A%E5%AF%B9%E5%A4%9A%E7%BB%93%E6%9E%84%E7%9A%84%E9%80%9A%E7%94%A8%E5%A4%84%E7%90%86/" title="代码层多对多结构的通用处理"><img src="/2025/01/26/%E5%A4%9A%E5%AF%B9%E5%A4%9A%E7%BB%93%E6%9E%84%E7%9A%84%E9%80%9A%E7%94%A8%E5%A4%84%E7%90%86/image.png" onerror="this.onerror=null;this.src='/images/image_missing.jpg'" alt="代码层多对多结构的通用处理"/></a><div class="content"><a class="title" href="/2025/01/26/%E5%A4%9A%E5%AF%B9%E5%A4%9A%E7%BB%93%E6%9E%84%E7%9A%84%E9%80%9A%E7%94%A8%E5%A4%84%E7%90%86/" title="代码层多对多结构的通用处理">代码层多对多结构的通用处理</a><time datetime="2025-01-26T10:39:56.000Z" title="发表于 2025-01-26 18:39:56">2025-01-26</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/01/17/Spring%20Security%EF%BC%88%E5%85%AB%EF%BC%89%E9%9B%86%E6%88%90%20Redis/" title="Spring Security（八）集成 Redis"><img src="/images/covers/Java.png" onerror="this.onerror=null;this.src='/images/image_missing.jpg'" alt="Spring Security（八）集成 Redis"/></a><div class="content"><a class="title" href="/2025/01/17/Spring%20Security%EF%BC%88%E5%85%AB%EF%BC%89%E9%9B%86%E6%88%90%20Redis/" title="Spring Security（八）集成 Redis">Spring Security（八）集成 Redis</a><time datetime="2025-01-17T02:22:24.000Z" title="发表于 2025-01-17 10:22:24">2025-01-17</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2023 - 2025 By Amane64</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = null
+
+  const getCount = () => {
+    const countELement = document.getElementById('twikoo-count')
+    if(!countELement) return
+    twikoo.getCommentsCount({
+      envId: 'https://blog-comments.amane64.site/',
+      region: '',
+      urls: [window.location.pathname],
+      includeReply: false
+    }).then(res => {
+      countELement.textContent = res[0].count
+    }).catch(err => {
+      console.error(err)
+    })
+  }
+
+  const init = (el = document, path = location.pathname) => {
+    twikoo.init({
+      el: el.querySelector('#twikoo-wrap'),
+      envId: 'https://blog-comments.amane64.site/',
+      region: '',
+      onCommentLoaded: () => {
+        btf.loadLightbox(document.querySelectorAll('#twikoo .tk-content img:not(.tk-owo-emotion)'))
+      },
+      ...option,
+      path: isShuoshuo ? path : (option && option.path) || path
+    })
+
+    
+
+    isShuoshuo && (window.shuoshuoComment.destroyTwikoo = () => {
+      if (el.children.length) {
+        el.innerHTML = ''
+        el.classList.add('no-comment')
+      }
+    })
+  }
+
+  const loadTwikoo = (el, path) => {
+    if (typeof twikoo === 'object') setTimeout(() => init(el, path), 0)
+    else btf.getScript('https://cdn.jsdelivr.net/npm/twikoo/dist/twikoo.all.min.js').then(() => init(el, path))
+  }
+
+  if (isShuoshuo) {
+    'Twikoo' === 'Twikoo'
+      ? window.shuoshuoComment = { loadComment: loadTwikoo }
+      : window.loadOtherComment = loadTwikoo
+    return
+  }
+
+  if ('Twikoo' === 'Twikoo' || !true) {
+    if (true) btf.loadComment(document.getElementById('twikoo-wrap'), loadTwikoo)
+    else loadTwikoo()
+  } else {
+    window.loadOtherComment = loadTwikoo
+  }
+})()</script></div><script async data-pjax src="/js/amane64.js"></script><script async data-pjax src="//npm.elemecdn.com/pace-js@1.2.4/pace.min.js"></script><script async data-pjax src="https://cdn1.tianli0.top/npm/vue@2.6.14/dist/vue.min.js"></script><script async data-pjax src="https://cdn1.tianli0.top/npm/element-ui@2.15.6/lib/index.js"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = false;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>(() => {
+  const pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+  window.pjax = new Pjax({
+    elements: 'a:not([target="_blank"])',
+    selectors: pjaxSelectors,
+    cacheBust: false,
+    analytics: false,
+    scrollRestoration: false
+  })
+
+  const triggerPjaxFn = (val) => {
+    if (!val) return
+    Object.values(val).forEach(fn => fn())
+  }
+
+  document.addEventListener('pjax:send', () => {
+    // removeEventListener
+    btf.removeGlobalFnEvent('pjaxSendOnce')
+    btf.removeGlobalFnEvent('themeChange')
+
+    // reset readmode
+    const $bodyClassList = document.body.classList
+    if ($bodyClassList.contains('read-mode')) $bodyClassList.remove('read-mode')
+
+    triggerPjaxFn(window.globalFn.pjaxSend)
+  })
+
+  document.addEventListener('pjax:complete', () => {
+    btf.removeGlobalFnEvent('pjaxCompleteOnce')
+    document.querySelectorAll('script[data-pjax]').forEach(item => {
+      const newScript = document.createElement('script')
+      const content = item.text || item.textContent || item.innerHTML || ""
+      Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+      newScript.appendChild(document.createTextNode(content))
+      item.parentNode.replaceChild(newScript, item)
+    })
+
+    triggerPjaxFn(window.globalFn.pjaxComplete)
+  })
+
+  document.addEventListener('pjax:error', e => {
+    if (e.request.status === 404) {
+      pjax.loadUrl('/404.html')
+    }
+  })
+})()</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="text-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js"></script></div></div><!-- hexo injector body_end start --> <script data-pjax>if(document.getElementById('recent-posts') && (location.pathname ==='/'|| '/' ==='all')){
+    var parent = document.getElementById('recent-posts');
+    var child = '<div class="recent-post-item" style="width:100%;height: auto"><div id="catalog_magnet"><div class="magnet_item"><a class="magnet_link" href="https://blog.amane64.site/categories/Spring-Security/"><div class="magnet_link_context" style=""><span style="font-weight:500;flex:1">🔒 Spring-Security (8)</span><span style="padding:0px 4px;border-radius: 8px;"><i class="fas fa-arrow-circle-right"></i></span></div></a></div><div class="magnet_item"><a class="magnet_link" href="https://blog.amane64.site/categories/Sa-Token/"><div class="magnet_link_context" style=""><span style="font-weight:500;flex:1">🛡️ Sa-Token (3)</span><span style="padding:0px 4px;border-radius: 8px;"><i class="fas fa-arrow-circle-right"></i></span></div></a></div><div class="magnet_item"><a class="magnet_link" href="https://blog.amane64.site/categories/Vue/"><div class="magnet_link_context" style=""><span style="font-weight:500;flex:1">🖥️ Vue (5)</span><span style="padding:0px 4px;border-radius: 8px;"><i class="fas fa-arrow-circle-right"></i></span></div></a></div><div class="magnet_item"><a class="magnet_link" href="https://blog.amane64.site/categories/Spring/"><div class="magnet_link_context" style=""><span style="font-weight:500;flex:1">🌱 Spring (16)</span><span style="padding:0px 4px;border-radius: 8px;"><i class="fas fa-arrow-circle-right"></i></span></div></a></div><div class="magnet_item"><a class="magnet_link" href="https://blog.amane64.site/categories/Java/"><div class="magnet_link_context" style=""><span style="font-weight:500;flex:1">☕ Java (19)</span><span style="padding:0px 4px;border-radius: 8px;"><i class="fas fa-arrow-circle-right"></i></span></div></a></div><div class="magnet_item"><a class="magnet_link" href="https://blog.amane64.site/categories/Python/"><div class="magnet_link_context" style=""><span style="font-weight:500;flex:1">🐍 Python (1)</span><span style="padding:0px 4px;border-radius: 8px;"><i class="fas fa-arrow-circle-right"></i></span></div></a></div><a class="magnet_link_more"  href="https://blog.amane64.site/categories" style="flex:1;text-align: center;margin-bottom: 10px;">查看更多...</a></div></div>';
+    console.log('已挂载magnet')
+    parent.insertAdjacentHTML("afterbegin",child)}
+     </script><style>#catalog_magnet{flex-wrap: wrap;display: flex;width:100%;justify-content:space-between;padding: 10px 10px 0 10px;align-content: flex-start;}.magnet_item{flex-basis: calc(33.333333333333336% - 5px);background: #f2f2f2;margin-bottom: 10px;border-radius: 8px;transition: all 0.2s ease-in-out;}.magnet_item:hover{background: #FFA500}.magnet_link_more{color:#555}.magnet_link{color:black}.magnet_link:hover{color:white}@media screen and (max-width: 600px) {.magnet_item {flex-basis: 100%;}}.magnet_link_context{display:flex;padding: 10px;font-size:16px;transition: all 0.2s ease-in-out;}.magnet_link_context:hover{padding: 10px 20px;}</style>
+    <style></style><script data-pjax>
+  function butterfly_swiper_injector_config(){
+    var parent_div_git = document.getElementById('recent-posts');
+    var item_html = '<div class="recent-post-item" style="height: auto;width: 100%"><div class="blog-slider swiper-container-fade swiper-container-horizontal" id="swiper_container"><div class="blog-slider__wrp swiper-wrapper" style="transition-duration: 0ms;"><div class="blog-slider__item swiper-slide" style="width: 750px; opacity: 1; transform: translate3d(0px, 0px, 0px); transition-duration: 0ms;"><a class="blog-slider__img" onclick="pjax.loadUrl(&quot;2025/02/12/Sa-Token（三）权限认证构成与鉴权方法/&quot;);" href="javascript:void(0);" alt=""><img width="48" height="48" src="/images/covers/sa-token.png" alt="" onerror="this.src=https://unpkg.zhimg.com/akilar-candyassets/image/loading.gif; this.onerror = null;"/></a><div class="blog-slider__content"><span class="blog-slider__code">2025-02-12</span><a class="blog-slider__title" onclick="pjax.loadUrl(&quot;2025/02/12/Sa-Token（三）权限认证构成与鉴权方法/&quot;);" href="javascript:void(0);" alt="">Sa-Token（三）权限认证构成与鉴权方法</a><div class="blog-slider__text">权限认证构成与鉴权方法</div><a class="blog-slider__button" onclick="pjax.loadUrl(&quot;2025/02/12/Sa-Token（三）权限认证构成与鉴权方法/&quot;);" href="javascript:void(0);" alt="">详情       </a></div></div><div class="blog-slider__item swiper-slide" style="width: 750px; opacity: 1; transform: translate3d(0px, 0px, 0px); transition-duration: 0ms;"><a class="blog-slider__img" onclick="pjax.loadUrl(&quot;2025/02/12/Sa-Token（二）实现登录注销操作/&quot;);" href="javascript:void(0);" alt=""><img width="48" height="48" src="/images/covers/sa-token.png" alt="" onerror="this.src=https://unpkg.zhimg.com/akilar-candyassets/image/loading.gif; this.onerror = null;"/></a><div class="blog-slider__content"><span class="blog-slider__code">2025-02-12</span><a class="blog-slider__title" onclick="pjax.loadUrl(&quot;2025/02/12/Sa-Token（二）实现登录注销操作/&quot;);" href="javascript:void(0);" alt="">Sa-Token（二）实现登录注销操作</a><div class="blog-slider__text">实现接入数据库的登录注销操作</div><a class="blog-slider__button" onclick="pjax.loadUrl(&quot;2025/02/12/Sa-Token（二）实现登录注销操作/&quot;);" href="javascript:void(0);" alt="">详情       </a></div></div><div class="blog-slider__item swiper-slide" style="width: 750px; opacity: 1; transform: translate3d(0px, 0px, 0px); transition-duration: 0ms;"><a class="blog-slider__img" onclick="pjax.loadUrl(&quot;2025/02/11/Sa-Token（一）简介与配置/&quot;);" href="javascript:void(0);" alt=""><img width="48" height="48" src="/images/covers/sa-token.png" alt="" onerror="this.src=https://unpkg.zhimg.com/akilar-candyassets/image/loading.gif; this.onerror = null;"/></a><div class="blog-slider__content"><span class="blog-slider__code">2025-02-11</span><a class="blog-slider__title" onclick="pjax.loadUrl(&quot;2025/02/11/Sa-Token（一）简介与配置/&quot;);" href="javascript:void(0);" alt="">Sa-Token（一）简介与配置</a><div class="blog-slider__text">国产超简洁鉴权框架</div><a class="blog-slider__button" onclick="pjax.loadUrl(&quot;2025/02/11/Sa-Token（一）简介与配置/&quot;);" href="javascript:void(0);" alt="">详情       </a></div></div></div><div class="blog-slider__pagination swiper-pagination-clickable swiper-pagination-bullets"></div></div></div>';
+    console.log('已挂载butterfly_swiper')
+    parent_div_git.insertAdjacentHTML("afterbegin",item_html)
+    }
+  var elist = 'undefined'.split(',');
+  var cpage = location.pathname;
+  var epage = '/';
+  var flag = 0;
+
+  for (var i=0;i<elist.length;i++){
+    if (cpage.includes(elist[i])){
+      flag++;
+    }
+  }
+
+  if ((epage ==='all')&&(flag == 0)){
+    butterfly_swiper_injector_config();
+  }
+  else if (epage === cpage){
+    butterfly_swiper_injector_config();
+  }
+  </script><script defer src="https://npm.elemecdn.com/hexo-butterfly-swiper/lib/swiper.min.js"></script><script defer data-pjax src="https://npm.elemecdn.com/hexo-butterfly-swiper/lib/swiper_init.js"></script><!-- hexo injector body_end end --></body></html>
