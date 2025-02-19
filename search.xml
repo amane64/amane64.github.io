@@ -4,6 +4,37 @@
   
     
     <entry>
+      <title>Element-plus 按需引入 el-loading el-message message-box 不显示</title>
+      <link href="/2025/02/20/Element-plus-%E6%8C%89%E9%9C%80%E5%BC%95%E5%85%A5-el-loading-el-message-message-box-%E4%B8%8D%E6%98%BE%E7%A4%BA/"/>
+      <url>/2025/02/20/Element-plus-%E6%8C%89%E9%9C%80%E5%BC%95%E5%85%A5-el-loading-el-message-message-box-%E4%B8%8D%E6%98%BE%E7%A4%BA/</url>
+      
+        <content type="html"><![CDATA[<h2 id="Element-plus-按需引入-el-loading-el-message-message-box-不显示"><a href="#Element-plus-按需引入-el-loading-el-message-message-box-不显示" class="headerlink" title="Element-plus 按需引入 el-loading el-message message-box 不显示"></a>Element-plus 按需引入 el-loading el-message message-box 不显示</h2><p>实际上，element-plus 的按需引入只管理了组件，没管理样式，我们还需要另外配置。</p><blockquote><p>也不清楚这个算不算<code>bug</code>，官网也没提这事</p></blockquote><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pnpm i vite-plugin-style-import consola -D</span><br></pre></td></tr></table></figure><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// vite.config.ts</span></span><br><span class="line"><span class="keyword">import</span> &#123;</span><br><span class="line">  createStyleImportPlugin,</span><br><span class="line">  <span class="title class_">ElementPlusResolve</span>,</span><br><span class="line">&#125; <span class="keyword">from</span> <span class="string">&#x27;vite-plugin-style-import&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> &#123;</span><br><span class="line">  <span class="attr">plugins</span>: [</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">    <span class="title function_">createStyleImportPlugin</span>(&#123;</span><br><span class="line">      <span class="attr">resolves</span>: [<span class="title class_">ElementPlusResolve</span>()],</span><br><span class="line">      <span class="attr">libs</span>: [</span><br><span class="line">        &#123;</span><br><span class="line">          <span class="attr">libraryName</span>: <span class="string">&#x27;element-plus&#x27;</span>,</span><br><span class="line">          <span class="attr">esModule</span>: <span class="literal">true</span>,</span><br><span class="line">          <span class="attr">resolveStyle</span>: <span class="function">(<span class="params"><span class="attr">name</span>: <span class="built_in">string</span></span>) =&gt;</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="string">`element-plus/theme-chalk/<span class="subst">$&#123;name&#125;</span>.css`</span></span><br><span class="line">          &#125;,</span><br><span class="line">        &#125;,</span><br><span class="line">      ]</span><br><span class="line">    &#125;),</span><br><span class="line">  ],</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
+      
+      
+      <categories>
+          
+          <category> Vue </category>
+          
+          <category> Bug 解决方案 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Vue </tag>
+            
+            <tag> Element-plus </tag>
+            
+            <tag> Bug 解决方案 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>Spring AI（一）简单构建与大模型对话</title>
       <link href="/2025/02/20/Spring-AI%EF%BC%88%E4%B8%80%EF%BC%89%E7%AE%80%E5%8D%95%E6%9E%84%E5%BB%BA%E4%B8%8E%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AF%B9%E8%AF%9D-1/"/>
       <url>/2025/02/20/Spring-AI%EF%BC%88%E4%B8%80%EF%BC%89%E7%AE%80%E5%8D%95%E6%9E%84%E5%BB%BA%E4%B8%8E%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AF%B9%E8%AF%9D-1/</url>
@@ -78,9 +109,9 @@
             
             <tag> SpringBoot </tag>
             
-            <tag> 加密验证 </tag>
-            
             <tag> Sa-Token </tag>
+            
+            <tag> 加密验证 </tag>
             
         </tags>
       
@@ -115,9 +146,9 @@
             
             <tag> SpringBoot </tag>
             
-            <tag> 加密验证 </tag>
-            
             <tag> Sa-Token </tag>
+            
+            <tag> 加密验证 </tag>
             
         </tags>
       
@@ -152,9 +183,9 @@
             
             <tag> SpringBoot </tag>
             
-            <tag> 加密验证 </tag>
-            
             <tag> Sa-Token </tag>
+            
+            <tag> 加密验证 </tag>
             
         </tags>
       
@@ -189,9 +220,9 @@
             
             <tag> SpringBoot </tag>
             
-            <tag> 加密验证 </tag>
-            
             <tag> Sa-Token </tag>
+            
+            <tag> 加密验证 </tag>
             
         </tags>
       
@@ -257,9 +288,9 @@
             
             <tag> SpringBoot </tag>
             
-            <tag> Spring-Security </tag>
-            
             <tag> 加密验证 </tag>
+            
+            <tag> Spring-Security </tag>
             
         </tags>
       
@@ -294,9 +325,9 @@
             
             <tag> SpringBoot </tag>
             
-            <tag> Spring-Security </tag>
-            
             <tag> 加密验证 </tag>
+            
+            <tag> Spring-Security </tag>
             
         </tags>
       
@@ -331,9 +362,9 @@
             
             <tag> SpringBoot </tag>
             
-            <tag> Spring-Security </tag>
-            
             <tag> 加密验证 </tag>
+            
+            <tag> Spring-Security </tag>
             
         </tags>
       
@@ -368,9 +399,9 @@
             
             <tag> SpringBoot </tag>
             
-            <tag> Spring-Security </tag>
-            
             <tag> 加密验证 </tag>
+            
+            <tag> Spring-Security </tag>
             
         </tags>
       
@@ -405,9 +436,9 @@
             
             <tag> SpringBoot </tag>
             
-            <tag> Spring-Security </tag>
-            
             <tag> 加密验证 </tag>
+            
+            <tag> Spring-Security </tag>
             
         </tags>
       
@@ -442,9 +473,9 @@
             
             <tag> SpringBoot </tag>
             
-            <tag> Spring-Security </tag>
-            
             <tag> 加密验证 </tag>
+            
+            <tag> Spring-Security </tag>
             
         </tags>
       
@@ -479,9 +510,9 @@
             
             <tag> SpringBoot </tag>
             
-            <tag> Spring-Security </tag>
-            
             <tag> 加密验证 </tag>
+            
+            <tag> Spring-Security </tag>
             
         </tags>
       
@@ -516,9 +547,9 @@
             
             <tag> SpringBoot </tag>
             
-            <tag> Spring-Security </tag>
-            
             <tag> 加密验证 </tag>
+            
+            <tag> Spring-Security </tag>
             
         </tags>
       
@@ -881,11 +912,11 @@
             
             <tag> SpringBoot </tag>
             
+            <tag> 加密验证 </tag>
+            
             <tag> Spring-Security </tag>
             
             <tag> JWT </tag>
-            
-            <tag> 加密验证 </tag>
             
         </tags>
       
@@ -953,9 +984,9 @@
             
             <tag> SpringBoot </tag>
             
-            <tag> JWT </tag>
-            
             <tag> 加密验证 </tag>
+            
+            <tag> JWT </tag>
             
         </tags>
       
