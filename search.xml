@@ -4,6 +4,45 @@
   
     
     <entry>
+      <title>【BUG】Mybatis-Plus 分页查询数据缺失（两步联查法优化）</title>
+      <link href="/2025/03/29/%E3%80%90BUG%E3%80%91Mybatis-Plus-%E5%88%86%E9%A1%B5%E6%9F%A5%E8%AF%A2%E6%95%B0%E6%8D%AE%E7%BC%BA%E5%A4%B1%EF%BC%88%E4%B8%A4%E6%AD%A5%E8%81%94%E6%9F%A5%E6%B3%95%E4%BC%98%E5%8C%96%EF%BC%89/"/>
+      <url>/2025/03/29/%E3%80%90BUG%E3%80%91Mybatis-Plus-%E5%88%86%E9%A1%B5%E6%9F%A5%E8%AF%A2%E6%95%B0%E6%8D%AE%E7%BC%BA%E5%A4%B1%EF%BC%88%E4%B8%A4%E6%AD%A5%E8%81%94%E6%9F%A5%E6%B3%95%E4%BC%98%E5%8C%96%EF%BC%89/</url>
+      
+        <content type="html"><![CDATA[<h2 id="【BUG】Mybatis-Plus-分页查询数据缺失（两步联查法优化）"><a href="#【BUG】Mybatis-Plus-分页查询数据缺失（两步联查法优化）" class="headerlink" title="【BUG】Mybatis-Plus 分页查询数据缺失（两步联查法优化）"></a>【BUG】Mybatis-Plus 分页查询数据缺失（两步联查法优化）</h2><h3 id="一、BUG-简述"><a href="#一、BUG-简述" class="headerlink" title="一、BUG 简述"></a>一、BUG 简述</h3><p>分页查询时，查询第一页，每页10条，却只有小于10条的数据，且显示有更多页，如图。</p><p><img src="/2025/03/29/%E3%80%90BUG%E3%80%91Mybatis-Plus-%E5%88%86%E9%A1%B5%E6%9F%A5%E8%AF%A2%E6%95%B0%E6%8D%AE%E7%BC%BA%E5%A4%B1%EF%BC%88%E4%B8%A4%E6%AD%A5%E8%81%94%E6%9F%A5%E6%B3%95%E4%BC%98%E5%8C%96%EF%BC%89/BUG%E6%A0%B7%E4%BE%8B.png" alt="BUG样例"></p><hr><h3 id="二、原因分析"><a href="#二、原因分析" class="headerlink" title="二、原因分析"></a>二、原因分析</h3><p>该分页查询为<strong>复杂的多表联查</strong>，实际查询的数据参考如下：</p><p><img src="/2025/03/29/%E3%80%90BUG%E3%80%91Mybatis-Plus-%E5%88%86%E9%A1%B5%E6%9F%A5%E8%AF%A2%E6%95%B0%E6%8D%AE%E7%BC%BA%E5%A4%B1%EF%BC%88%E4%B8%A4%E6%AD%A5%E8%81%94%E6%9F%A5%E6%B3%95%E4%BC%98%E5%8C%96%EF%BC%89/%E6%9F%A5%E8%AF%A2%E7%BB%93%E6%9E%9C.png" alt="查询结果"></p><p>如图所示，多表联查的结果为<strong>笛卡尔积</strong>，前10个结果包含重复内容，而 Mybatis-Plus 的 IPage 构件自动将数据解析为<strong>单个对象</strong>，但是<strong>数据量相关的数据不变</strong>，导致查询前10个数据，但实际只有部分数据被封装。</p><hr><h3 id="三、解决方案"><a href="#三、解决方案" class="headerlink" title="三、解决方案"></a>三、解决方案</h3><p><strong>优化 SQL 查询</strong></p><p>因为  Mybatis-Plus 不推荐多表联查，放弃直接使用 Mybatis-Plus 分页查询全部数据，改为<strong>两步联查法</strong>。</p><p>该方案在千万级数据量下实测分页响应时间可控制在 50ms 内，同时保证分页准确性。</p><p>将原本的查询方案拆分成以下两部分：</p><ol><li>根据条件分页查询主表主键<br>只查询主键，避免生成笛卡尔积，影响分页数据解析</li><li>根据主表主键查询完整数据列表<br>根据主键，刮削其余数据，覆盖回原本的 Resords 列表</li></ol>]]></content>
+      
+      
+      <categories>
+          
+          <category> Java </category>
+          
+          <category> Bug 解决方案 </category>
+          
+          <category> Spring </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Java </tag>
+            
+            <tag> 数据库 </tag>
+            
+            <tag> SQL </tag>
+            
+            <tag> Mysql </tag>
+            
+            <tag> Spring </tag>
+            
+            <tag> SpringBoot </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>Vue3 + Springboot3 前后端分离转合并</title>
       <link href="/2025/03/23/Vue3-Springboot3-%E5%89%8D%E5%90%8E%E7%AB%AF%E5%88%86%E7%A6%BB%E8%BD%AC%E5%90%88%E5%B9%B6/"/>
       <url>/2025/03/23/Vue3-Springboot3-%E5%89%8D%E5%90%8E%E7%AB%AF%E5%88%86%E7%A6%BB%E8%BD%AC%E5%90%88%E5%B9%B6/</url>
@@ -24,9 +63,9 @@
       
         <tags>
             
-            <tag> Java </tag>
-            
             <tag> 前端 </tag>
+            
+            <tag> Java </tag>
             
             <tag> Spring </tag>
             
@@ -674,9 +713,9 @@
       
         <tags>
             
-            <tag> Java </tag>
-            
             <tag> Python </tag>
+            
+            <tag> Java </tag>
             
             <tag> 跨语言运行 </tag>
             
@@ -880,9 +919,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> 查找算法 </tag>
-            
             <tag> 有序表 </tag>
+            
+            <tag> 查找算法 </tag>
             
         </tags>
       
@@ -913,9 +952,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> 二叉树 </tag>
-            
             <tag> 查找算法 </tag>
+            
+            <tag> 二叉树 </tag>
             
         </tags>
       
